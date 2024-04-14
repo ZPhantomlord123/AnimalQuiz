@@ -1,13 +1,18 @@
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class InteractableCard : MonoBehaviour, IBeginDragHandler ,IEndDragHandler,IDragHandler
+public class InteractableCard : MonoBehaviour, IBeginDragHandler ,IEndDragHandler,IDragHandler, IPointerClickHandler
 {
     private RectTransform rectTransform;
     private Canvas canvas;
     private CanvasGroup canvasGroup;
     private Vector2 offset;
     private Vector2 originalPosition;
+
+    public CardCategory cardCategory;
+    public TextMeshProUGUI descriptionText;
 
     private void Start()
     {
@@ -22,6 +27,7 @@ public class InteractableCard : MonoBehaviour, IBeginDragHandler ,IEndDragHandle
         canvasGroup.alpha = 0.6f;
         canvasGroup.blocksRaycasts = false;
     }
+
 
     public void OnDrag(PointerEventData eventData)
     {
@@ -50,5 +56,16 @@ public class InteractableCard : MonoBehaviour, IBeginDragHandler ,IEndDragHandle
     public void SnapBack()
     {
         rectTransform.anchoredPosition = originalPosition;
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        ShowDescription();
+    }
+
+    private void ShowDescription()
+    {
+        Debug.Log("Showing description for");
+        // Implement your UI logic here
     }
 }

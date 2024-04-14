@@ -3,6 +3,7 @@ using UnityEngine.EventSystems;
 
 public class InteractableBucket : MonoBehaviour, IDropHandler
 {
+    public CardCategory category;
     public void OnDrop(PointerEventData eventData)
     {
         InteractableCard card = eventData.pointerDrag.GetComponent<InteractableCard>();
