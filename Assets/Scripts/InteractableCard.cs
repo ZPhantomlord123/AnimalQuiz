@@ -2,23 +2,40 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class InteractableCard : MonoBehaviour, IBeginDragHandler ,IEndDragHandler,IDragHandler, IPointerClickHandler
 {
-    private RectTransform rectTransform;
+    public RectTransform rectTransform;
     private Canvas canvas;
     private CanvasGroup canvasGroup;
     private Vector2 offset;
     private Vector2 originalPosition;
 
-    public CardCategory cardCategory;
-    public TextMeshProUGUI descriptionText;
+    public CardCategory[] categories;
+    public string animalNameText;
+    public string descriptionText;
 
-    private void Start()
+    public GameObject correctContext;
+    public GameObject incorrectContextt;
+    public Image bucketDropped;
+    public bool isCorrect;
+
+
+    private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
+    }
+    private void Start()
+    {
+        
         canvas = GetComponentInParent<Canvas>();
         canvasGroup = GetComponent<CanvasGroup>();
+        originalPosition = rectTransform.anchoredPosition;
+    }
+
+    public void SetOriginalPosition()
+    {
         originalPosition = rectTransform.anchoredPosition;
     }
 
@@ -36,7 +53,6 @@ public class InteractableCard : MonoBehaviour, IBeginDragHandler ,IEndDragHandle
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        canvasGroup.alpha = 1f;
         canvasGroup.blocksRaycasts = true;
         SnapBack();
     }
@@ -55,6 +71,7 @@ public class InteractableCard : MonoBehaviour, IBeginDragHandler ,IEndDragHandle
 
     public void SnapBack()
     {
+        canvasGroup.alpha = 1f;
         rectTransform.anchoredPosition = originalPosition;
     }
 
@@ -65,7 +82,31 @@ public class InteractableCard : MonoBehaviour, IBeginDragHandler ,IEndDragHandle
 
     private void ShowDescription()
     {
-        Debug.Log("Showing description for");
-        // Implement your UI logic here
+        UIController.Instance.ToggleDescriptionPanel(true, 0);
+        UIController.Instance.SetNameAndDescriptionText(animalNameText, descriptionText);
+    }
+
+    public void CheckCategoryMatch(CardCategory bucketCategory)
+    {
+        foreach (CardCategory cardCategory in categories)
+        {
+            if (cardCategory == bucketCategory)
+            {
+                Debug.Log("Card '" + animalNameText + "' matched category: " + bucketCategory.ToString());
+                correctContext.SetActive(true);
+                isCorrect = true;
+                return;
+            }
+        }
+
+        Debug.Log("Card '" + animalNameText + "' did not match category: " + bucketCategory.ToString());
+        incorrectContextt.SetActive(true);
+        isCorrect = false;
+    }
+
+    public void SetBucketDroppedSprite(Image image)
+    {
+        bucketDropped?.gameObject.SetActive(true);
+        bucketDropped.sprite = image.sprite;
     }
 }

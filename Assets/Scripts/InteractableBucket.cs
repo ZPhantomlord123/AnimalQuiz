@@ -1,15 +1,20 @@
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class InteractableBucket : MonoBehaviour, IDropHandler
 {
     public CardCategory category;
+
+    public event Action OnCardDropped;
     public void OnDrop(PointerEventData eventData)
     {
         InteractableCard card = eventData.pointerDrag.GetComponent<InteractableCard>();
 
         if (card != null)
         {
+            card.SnapBack();
             card.DisableCard();
             HandleDroppedCard(card);
         }
@@ -17,7 +22,8 @@ public class InteractableBucket : MonoBehaviour, IDropHandler
 
     private void HandleDroppedCard(InteractableCard card)
     {
-        // You can add additional logic here for handling the dropped card
-        Debug.Log("Card dropped into the bucket: " + card.gameObject.name);
+        card.SetBucketDroppedSprite(GetComponent<Image>());
+        card.CheckCategoryMatch(category);
+        OnCardDropped?.Invoke();
     }
 }

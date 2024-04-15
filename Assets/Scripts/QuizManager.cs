@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
+using UnityEditor.SearchService;
 
 public class QuizManager : MonoBehaviour
 {
@@ -11,27 +12,33 @@ public class QuizManager : MonoBehaviour
     public InteractableBucket blueBucket;
     public TextMeshProUGUI redBucketText;
     public TextMeshProUGUI blueBucketText;
+    public TextMeshProUGUI correctScoreText;
+    private int correctScoreCount = 0;
+    public TextMeshProUGUI incorrectScoreText;
+    private int incorrectScoreCount = 0;
+    public TextMeshProUGUI finalScoreText;
 
-    private CardCategory currentCategory;
-    private List<Vector3> initialCardPositions = new List<Vector3>();
-    private List<string> correctMatches = new List<string>();
-    private List<string> incorrectMatches = new List<string>();
+    public int cardCount = 0;
 
     private void Start()
     {
         RandomizeCardPositions();
         SetRandomCategory();
         UpdateBucketText();
+
+        // Subscribe to the OnCardDropped event of redBucket and blueBucket
+        redBucket.OnCardDropped += HandleCardDropped;
+        blueBucket.OnCardDropped += HandleCardDropped;
     }
 
     private void RandomizeCardPositions()
     {
-        foreach (InteractableCard card in cards)
-        {
-            initialCardPositions.Add(card.transform.position);
-        }
-
         ShuffleCardPositions();
+        // Store the initial positions after shuffling
+        for (int i = 0; i < cards.Count; i++)
+        {
+            cards[i].SetOriginalPosition();
+        }
     }
 
     private void ShuffleCardPositions()
@@ -39,11 +46,12 @@ public class QuizManager : MonoBehaviour
         for (int i = 0; i < cards.Count; i++)
         {
             int randomIndex = Random.Range(i, cards.Count);
-            Vector3 tempPosition = cards[i].transform.position;
-            cards[i].transform.position = cards[randomIndex].transform.position;
-            cards[randomIndex].transform.position = tempPosition;
+            Vector3 tempPosition = cards[i].rectTransform.anchoredPosition;
+            cards[i].rectTransform.anchoredPosition = cards[randomIndex].rectTransform.anchoredPosition;
+            cards[randomIndex].rectTransform.anchoredPosition = tempPosition;
         }
     }
+
 
     private void SetRandomCategory()
     {
@@ -64,8 +72,6 @@ public class QuizManager : MonoBehaviour
         Debug.Log("Blue Bucket Category: " + blueBucket.category.ToString());
     }
 
-
-
     private void UpdateBucketText()
     {
         redBucketText.text = redBucket.category.ToString();
@@ -85,14 +91,46 @@ public class QuizManager : MonoBehaviour
         return randomCategory;
     }
 
-    // Methods for accessing match data for later use
-    public List<string> GetCorrectMatches()
+    public void OnDescriptionCloseButtonPressed()
     {
-        return correctMatches;
+        UIController.Instance.ToggleDescriptionPanel(false, 0);
     }
 
-    public List<string> GetIncorrectMatches()
+    private void HandleCardDropped()
     {
-        return incorrectMatches;
+        cardCount++;
+        if (cardCount >= cards.Count)
+        {
+            DisplayFinalResult();
+        }
+    }
+
+    public void DisplayFinalResult()
+    {
+        Debug.Log("All cards have been dropped!");
+        UIController.Instance.ToggleFinishScreen(true, 0);
+        // Snap cards back to shuffled positions & update score
+        for (int i = 0; i < cards.Count; i++)
+        {
+            cards[i].gameObject.SetActive(true);
+            if (cards[i].isCorrect)
+            {
+                correctScoreCount++;
+            }
+            else
+            {
+                incorrectScoreCount++;
+            }
+        }
+        float finalScore = ((float)correctScoreCount / (float)cards.Count) * 100f;
+        finalScoreText.text = "Your Score : " + finalScore.ToString("F0") + "%";
+        correctScoreText.text = "- " + correctScoreCount.ToString();
+        incorrectScoreText.text = "- " + incorrectScoreCount.ToString();
+
+    }
+    public void OnPlayAgainButtonClicked()
+    {
+        // Reload the current scene
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
