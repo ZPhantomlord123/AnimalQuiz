@@ -54,7 +54,7 @@ public class InteractableCard : MonoBehaviour, IBeginDragHandler ,IEndDragHandle
     public void OnEndDrag(PointerEventData eventData)
     {
         canvasGroup.blocksRaycasts = true;
-        SnapBack();
+        SnapBack(1f);
     }
 
     private void SetDraggedPosition(PointerEventData eventData)
@@ -69,8 +69,9 @@ public class InteractableCard : MonoBehaviour, IBeginDragHandler ,IEndDragHandle
         this.gameObject.SetActive(false);
     }
 
-    public void SnapBack()
+    public void SnapBack(float audioPitch)
     {
+        AudioManager.instance.PlaySoundEffect(audioPitch);
         canvasGroup.alpha = 1f;
         rectTransform.anchoredPosition = originalPosition;
     }

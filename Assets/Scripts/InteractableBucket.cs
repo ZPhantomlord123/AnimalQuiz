@@ -14,7 +14,7 @@ public class InteractableBucket : MonoBehaviour, IDropHandler
 
         if (card != null)
         {
-            card.SnapBack();
+            card.SnapBack(2f);
             card.DisableCard();
             HandleDroppedCard(card);
         }
