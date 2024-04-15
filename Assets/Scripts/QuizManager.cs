@@ -133,4 +133,9 @@ public class QuizManager : MonoBehaviour
         // Reload the current scene
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
+
+    public void OnCheckResultButtonClicked(GameObject self) 
+    {
+        self.SetActive(false);
+    }
 }
